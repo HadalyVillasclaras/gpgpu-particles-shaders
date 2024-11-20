@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
-import GUI from 'lil-gui'
 import particlesVertexShader from './shaders/particles/vertex.glsl'
 import particlesFragmentShader from './shaders/particles/fragment.glsl'
 import gpgpuParticlesShader from './shaders/gpgpu/particles.glsl'
@@ -26,6 +25,12 @@ const gltfLoader = new GLTFLoader()
 gltfLoader.setDRACOLoader(dracoLoader)
 
 /**
+ * Load model
+ */
+const gltf = await gltfLoader.loadAsync('./flor4.glb');
+
+
+/**
  * Sizes
  */
 const sizes = {
@@ -39,9 +44,6 @@ window.addEventListener('resize', () => {
   sizes.width = window.innerWidth
   sizes.height = window.innerHeight
   sizes.pixelRatio = Math.min(window.devicePixelRatio, 2)
-
-  // Materials
-  particles.material.uniforms.uResolution.value.set(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)
 
   // Update camera
   if (sizes.width < 800) {
@@ -89,11 +91,6 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(sizes.pixelRatio)
-
-/**
- * Load model
- */
-const gltf = await gltfLoader.loadAsync('./flor4.glb');
 
 
 /**
@@ -152,13 +149,14 @@ const particles = {}
 const particleUvArray = new Float32Array(baseGeometry.count * 2);
 const sizesArray = new Float32Array(baseGeometry.count);
 console.log(sizesArray);
+
 for (let y = 0; y < gpgpu.size; y++) {
   for (let x = 0; x < gpgpu.size; x++) {
     const i = (y * gpgpu.size) + x;
     const i2 = i * 2;
 
     // Particles UV
-    const uvX = (x + 0.5) / gpgpu.size; //sumamos 0.5 porq queremos que coja la coordenada de en medio
+    const uvX = (x + 0.5) / gpgpu.size; 
     const uvY = (y + 0.5) / gpgpu.size;
 
     particleUvArray[i2 + 0] = uvX;
@@ -168,6 +166,7 @@ for (let y = 0; y < gpgpu.size; y++) {
     sizesArray[i] = Math.random();
   }
 }
+console.log(sizesArray);
 
 particles.geometry = new THREE.BufferGeometry();
 particles.geometry.setDrawRange(0, baseGeometry.count);
@@ -181,7 +180,7 @@ particles.material = new THREE.ShaderMaterial({
   fragmentShader: particlesFragmentShader,
   uniforms:
   {
-    uSize: new THREE.Uniform(0.030),
+    uSize: new THREE.Uniform(0.035),
     uResolution: new THREE.Uniform(new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)),
     uParticlesTexture: new THREE.Uniform(),
     uCursor: new THREE.Uniform(new THREE.Vector2(0, 0)),

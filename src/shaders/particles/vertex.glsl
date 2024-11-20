@@ -1,10 +1,9 @@
 uniform vec2 uResolution;
-uniform float uSize;
 uniform sampler2D uParticlesTexture;
 attribute vec2 aParticlesUv;
+uniform float uSize;
 attribute float aSize; // random sizes (set in the for loop)
 
-varying vec3 vPosition;
 varying vec3 vColor;
 
 uniform vec3 uColor1;
@@ -23,7 +22,6 @@ void main()
 	gl_Position = projectedPosition;
 
 	// Point size
-	//Ciclo de ls particulas -> se alargan, se mantienen, y vuelve a su sitio
 	float sizeIn = smoothstep(0.0, 0.4, particle.a); // particle gsl
 	float sizeOut = 1.0 - smoothstep(0.1, 1.0, particle.a); 
 	float size = min(sizeIn, sizeOut);

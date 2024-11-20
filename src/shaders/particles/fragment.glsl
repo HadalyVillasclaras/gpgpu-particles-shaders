@@ -1,6 +1,4 @@
 varying vec3 vColor;
-varying vec3 vPosition;
-uniform vec2 uMouse;
 
 void main()
 {
