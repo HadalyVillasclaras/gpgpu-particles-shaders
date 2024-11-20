@@ -59,6 +59,53 @@ function handleCameraUpdates() {
   camera.lookAt(target);
 }
 
+
+
+let theta = 0;
+let phi = Math.PI / 4;
+
+function onMouseMove(event) {
+  const thetaRange = Math.PI / 6;
+  const normalizedX = event.clientX / window.innerWidth;
+  theta = (normalizedX * 2 - 1) * thetaRange;
+
+  const mouseYNormalized = event.clientY / window.innerHeight;
+  const minPhi = Math.PI / 5;  // about 30 deg upwards
+  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
+}
+
+function updateCameraPosition() {
+  const zoom = 8;
+
+  // no lerp on first load
+  if (!camera.initialized) {
+    camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
+    camera.position.y = zoom * Math.cos(phi);
+    camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
+    camera.initialized = true; 
+    return; 
+  }
+
+  const targetX = zoom * Math.sin(phi) * Math.sin(theta);
+  const targetY = zoom * Math.cos(phi);
+  const targetZ = zoom * Math.sin(phi) * Math.cos(theta);
+
+  const lerpFactor = 0.1;
+
+  camera.position.x += (targetX - camera.position.x) * lerpFactor;
+  camera.position.y += (targetY - camera.position.y) * lerpFactor;
+  camera.position.z += (targetZ - camera.position.z) * lerpFactor;
+}
+
+function enableMouseMove() {
+  canvas.addEventListener('mousemove', onMouseMove, false);
+}
+
+function disableMouseMove() {
+  canvas.removeEventListener('mousemove', onMouseMove, false);
+}
+
 function onResizeScreen() {
   // Update sizes
   sizes.width = window.innerWidth
@@ -79,38 +126,6 @@ function onResizeScreen() {
   renderer.setSize(sizes.width, sizes.height)
   renderer.setPixelRatio(sizes.pixelRatio)
 }
-
-let theta = 0;
-let phi = Math.PI / 4;
-
-function onMouseMove(event) {
-  console.log('mouse');
-  const thetaRange = Math.PI / 6;
-  const normalizedX = event.clientX / window.innerWidth;
-  theta = (normalizedX * 2 - 1) * thetaRange;
-
-  const mouseYNormalized = event.clientY / window.innerHeight;
-  const minPhi = Math.PI / 5;  // about 30 deg upwards
-  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
-  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
-}
-
-function updateCameraPosition() {
-  const zoom = 8;
-  // Camera position based on mouse move
-  camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
-  camera.position.y = zoom * Math.cos(phi);
-  camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
-}
-
-function enableMouseMove() {
-  canvas.addEventListener('mousemove', onMouseMove, false);
-}
-
-function disableMouseMove() {
-  canvas.removeEventListener('mousemove', onMouseMove, false);
-}
-
 
 /**
  * Renderer
@@ -153,7 +168,6 @@ for (let i = 0; i < baseGeometry.count; i++) {
   color[i4 + 2] = position[i3 + 2]; // B
   color[i4 + 3] = Math.random();    // A
 }
-
 // Particles variables
 gpgpu.particlesVariable = gpgpu.computation.addVariable('uParticles', gpgpuParticlesShader, baseParticlesTexture)
 gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [gpgpu.particlesVariable]);
