@@ -5,13 +5,12 @@ import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer
 import particlesVertexShader from './shaders/particles/vertex.glsl'
 import particlesFragmentShader from './shaders/particles/fragment.glsl'
 import gpgpuParticlesShader from './shaders/gpgpu/particles.glsl'
-
 /**
  * Base
  */
 
 // Canvas
-const canvas = document.querySelector('canvas.webgl')
+const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
@@ -21,13 +20,12 @@ const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/draco/')
 
 const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
+gltfLoader.setDRACOLoader(dracoLoader);
 
 /**
  * Load model
  */
 const gltf = await gltfLoader.loadAsync('./flor4.glb');
-
 
 /**
  * Sizes
@@ -37,7 +35,6 @@ const sizes = {
   height: window.innerHeight,
   pixelRatio: Math.min(window.devicePixelRatio, 2)
 }
-
 
 
 /**
@@ -104,8 +101,9 @@ function updateCameraPosition() {
     phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
   }
 
-  document.addEventListener('mousemove', onMouseMove, false);
+  canvas.addEventListener('mousemove', onMouseMove, false);
 }
+
 
 
 /**
@@ -218,22 +216,31 @@ particles.material = new THREE.ShaderMaterial({
 
 // Points
 particles.points = new THREE.Points(particles.geometry, particles.material)
-scene.add(particles.points)
+scene.add(particles.points);
 
 
 /**
  * Animate
  */
-const clock = new THREE.Clock()
-let previousTime = 0
+const clock = new THREE.Clock();
+let previousTime = 0;
 
+const fps = 30; //  control the throttle
+const interval = 1000 / fps;
+let lastTime = 0;
+let animationFrameId = null;
 
-const animate = () => {
-  handleCameraUpdates();
+const animate = (time) => {
+  animationFrameId = requestAnimationFrame(animate);
 
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
+
+  if (time - lastTime < interval) {return};
+  lastTime = time;
+
+  handleCameraUpdates();
 
   // GPGPU Update
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
@@ -241,11 +248,32 @@ const animate = () => {
   gpgpu.computation.compute();
   particles.material.uniforms.uParticlesTexture.value = gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
 
-
-  window.requestAnimationFrame(animate);
-
   // Render normal scene
   renderer.render(scene, camera);
+};
+
+function startAnimation() {
+  if (!animationFrameId) {
+    animate();
+  }
 }
 
-animate();
+function stopAnimation() {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+}
+
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      startAnimation();
+    } else {
+      stopAnimation();
+    }
+  });
+}, { threshold: 0.1 });
+
+observer.observe(canvas);
