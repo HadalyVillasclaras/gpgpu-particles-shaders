@@ -8,7 +8,7 @@ uniform float uFlowFieldFrequency;
 #include ../includes/simplexNoise4d.glsl
 
 void main() {
-  float time = uTime * 0.1;
+  float time = uTime * 0.2;
   vec2 uv = gl_FragCoord.xy / resolution.xy;
   vec4 particle = texture(uParticles, uv);
   vec4 base = texture(uBase, uv);
@@ -22,11 +22,11 @@ void main() {
   // Alive
   else {
     // Strength
-    float strengthMultiplier = 2.0; 
+    float strengthMultiplier = 1.5; 
 
     float strength = simplexNoise4d(vec4(base.xyz * strengthMultiplier, time + 1.0)); 
     float influence = (uFlowFieldInfluence - 0.5) * (- 2.0); 
-    strength = smoothstep(influence , 1.0, strength);
+    strength = smoothstep(influence, 1.0, strength);
     
     // Flow field 
     vec3 flowField = vec3(
@@ -37,7 +37,7 @@ void main() {
 
     flowField = normalize(flowField);
 
-    particle.xyz += flowField * (uDeltaTime * 0.6 ) * strength * uFlowFieldStrength;
+    particle.xyz += flowField *  uDeltaTime  * strength * uFlowFieldStrength;
 
     // Decay
     particle.a += uDeltaTime * 0.10;

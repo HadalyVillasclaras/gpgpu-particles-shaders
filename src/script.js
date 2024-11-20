@@ -163,8 +163,8 @@ gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(baseParticlesTexture);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(0.35);
-gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(1.28);
-gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(1);
+gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(1.4);
+gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(1.0);
 
 //Init
 gpgpu.computation.init()
@@ -243,7 +243,7 @@ const animate = (time) => {
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
 
-  if (time - lastTime < interval) { return };
+  // if (time - lastTime < interval) { return };
   lastTime = time;
 
   handleCameraUpdates();
