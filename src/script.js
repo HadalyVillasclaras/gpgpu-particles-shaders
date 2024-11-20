@@ -71,16 +71,17 @@ if (sizes.width < 800) {
 } else {
   camera.position.set(3, 4, 5);
 }
-
+console.log(camera);
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
-controls.enableZoom = false;
-controls.enablePan = false;
-controls.minPolarAngle = 0.7;
-controls.maxPolarAngle = Math.PI * 0.35;
+controls.enabled = false;
+// controls.enableDamping = true
+// controls.enableZoom = false;
+// controls.enablePan = false;
+// controls.minPolarAngle = 0.7;
+// controls.maxPolarAngle = Math.PI * 0.35;
 
 /**
  * Renderer
@@ -91,7 +92,6 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(sizes.pixelRatio)
-
 
 /**
  * Base Geometry
@@ -148,7 +148,6 @@ const particles = {}
 // Geometry
 const particleUvArray = new Float32Array(baseGeometry.count * 2);
 const sizesArray = new Float32Array(baseGeometry.count);
-console.log(sizesArray);
 
 for (let y = 0; y < gpgpu.size; y++) {
   for (let x = 0; x < gpgpu.size; x++) {
@@ -156,7 +155,7 @@ for (let y = 0; y < gpgpu.size; y++) {
     const i2 = i * 2;
 
     // Particles UV
-    const uvX = (x + 0.5) / gpgpu.size; 
+    const uvX = (x + 0.5) / gpgpu.size;
     const uvY = (y + 0.5) / gpgpu.size;
 
     particleUvArray[i2 + 0] = uvX;
@@ -166,7 +165,6 @@ for (let y = 0; y < gpgpu.size; y++) {
     sizesArray[i] = Math.random();
   }
 }
-console.log(sizesArray);
 
 particles.geometry = new THREE.BufferGeometry();
 particles.geometry.setDrawRange(0, baseGeometry.count);
@@ -204,26 +202,51 @@ scene.add(particles.points)
 const clock = new THREE.Clock()
 let previousTime = 0
 
-const tick = () => {
-  const elapsedTime = clock.getElapsedTime()
-  const deltaTime = elapsedTime - previousTime;
-  previousTime = elapsedTime
+
+const target = new THREE.Vector3();
+const zoom = 8;
+
+let theta = 0;
+let phi = Math.PI / 4;
+
+document.addEventListener('mousemove', onMouseMove, false);
+
+function onMouseMove(event) {
+  const thetaRange = Math.PI / 6;
+  const normalizedX = event.clientX / window.innerWidth;
+  theta = (normalizedX * 2 - 1) * thetaRange;
+
+  const mouseYNormalized = event.clientY / window.innerHeight;
+  const minPhi = Math.PI / 5;  // about 30 deg upwards
+  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
+}
+
+const animate = () => {
+  // Camera position based on mouse move
+  camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
+  camera.position.y = zoom * Math.cos(phi);
+  camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
+  camera.lookAt(target);
 
   // Update controls
-  controls.update()
-
+  // controls.update()
+  const elapsedTime = clock.getElapsedTime();
+  const deltaTime = elapsedTime - previousTime;
+  previousTime = elapsedTime
   // GPGPU Update
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
   gpgpu.computation.compute();
   particles.material.uniforms.uParticlesTexture.value = gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
-  
+
+
+  window.requestAnimationFrame(animate);
+
   // Render normal scene
   renderer.render(scene, camera)
 
-  // Call tick again on the next frame
-  window.requestAnimationFrame(tick)
- 
+
 }
 
-tick()
+animate()
