@@ -21,10 +21,6 @@ void main() {
 
   // Alive
   else {
-    // Normalize cursor position (-1 to 1 to 0 to 1)
-    float normalizedMouseX = (uCursor.x + 1.0) * 0.5;
-    float normalizedMouseY = (uCursor.y + 1.0) * 0.5;
-    
     // Strength
     float strengthMultiplier = 2.0; 
 

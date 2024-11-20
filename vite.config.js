@@ -2,8 +2,8 @@ import restart from 'vite-plugin-restart'
 import glsl from 'vite-plugin-glsl'
 
 export default {
-    root: 'src/',
-    publicDir: '../static/',
+    root: '.',
+    publicDir: 'static/',
     base: './',
     server:
     {
@@ -12,14 +12,14 @@ export default {
     },
     build:
     {
-        outDir: '../dist', // Output in the dist/ folder
+        outDir: './dist', // Output in the dist/ folder
         emptyOutDir: true, // Empty the folder first
         sourcemap: true, // Add sourcemap
         target: 'esnext'
     },
     plugins:
     [
-        restart({ restart: [ '../static/**', ] }), // Restart server on static file change
+        restart({ restart: [ 'static/**', ] }), // Restart server on static file change
         glsl() // Handle shader files
     ]
 }
