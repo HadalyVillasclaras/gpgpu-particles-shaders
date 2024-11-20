@@ -83,27 +83,33 @@ function onResizeScreen() {
 let theta = 0;
 let phi = Math.PI / 4;
 
+function onMouseMove(event) {
+  console.log('mouse');
+  const thetaRange = Math.PI / 6;
+  const normalizedX = event.clientX / window.innerWidth;
+  theta = (normalizedX * 2 - 1) * thetaRange;
+
+  const mouseYNormalized = event.clientY / window.innerHeight;
+  const minPhi = Math.PI / 5;  // about 30 deg upwards
+  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
+}
+
 function updateCameraPosition() {
   const zoom = 8;
   // Camera position based on mouse move
   camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
   camera.position.y = zoom * Math.cos(phi);
   camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
+}
 
-  function onMouseMove(event) {
-    const thetaRange = Math.PI / 6;
-    const normalizedX = event.clientX / window.innerWidth;
-    theta = (normalizedX * 2 - 1) * thetaRange;
-
-    const mouseYNormalized = event.clientY / window.innerHeight;
-    const minPhi = Math.PI / 5;  // about 30 deg upwards
-    const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
-    phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
-  }
-
+function enableMouseMove() {
   canvas.addEventListener('mousemove', onMouseMove, false);
 }
 
+function disableMouseMove() {
+  canvas.removeEventListener('mousemove', onMouseMove, false);
+}
 
 
 /**
@@ -237,7 +243,7 @@ const animate = (time) => {
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
 
-  if (time - lastTime < interval) {return};
+  if (time - lastTime < interval) { return };
   lastTime = time;
 
   handleCameraUpdates();
@@ -270,8 +276,10 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       startAnimation();
+      enableMouseMove();
     } else {
       stopAnimation();
+      disableMouseMove();
     }
   });
 }, { threshold: 0.1 });
