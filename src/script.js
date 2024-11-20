@@ -47,19 +47,19 @@ const sizes = {
 const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100);
 scene.add(camera);
 
-let theta = 0;
-let phi = Math.PI / 4;
-
 // Camera updates 
-function onMouseMove(event) {
-  const thetaRange = Math.PI / 6;
-  const normalizedX = event.clientX / window.innerWidth;
-  theta = (normalizedX * 2 - 1) * thetaRange;
+function handleCameraUpdates() {
+  const target = new THREE.Vector3();
 
-  const mouseYNormalized = event.clientY / window.innerHeight;
-  const minPhi = Math.PI / 5;  // about 30 deg upwards
-  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
-  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
+  document.addEventListener('resize', onResizeScreen, false);
+
+  if (sizes.width < 800) {
+    camera.position.set(4.5, 7, 9);
+  } else {
+    // camera.position.set(3, 4, 5);
+    updateCameraPosition()
+  }
+  camera.lookAt(target);
 }
 
 function onResizeScreen() {
@@ -83,25 +83,28 @@ function onResizeScreen() {
   renderer.setPixelRatio(sizes.pixelRatio)
 }
 
+let theta = 0;
+let phi = Math.PI / 4;
+
 function updateCameraPosition() {
-  const target = new THREE.Vector3();
   const zoom = 8;
+  // Camera position based on mouse move
+  camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
+  camera.position.y = zoom * Math.cos(phi);
+  camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
 
-  if (sizes.width < 800) {
-    camera.position.set(4.5, 7, 9);
-  } else {
-    // camera.position.set(3, 4, 5);
-    document.addEventListener('mousemove', onMouseMove, false);
+  function onMouseMove(event) {
+    const thetaRange = Math.PI / 6;
+    const normalizedX = event.clientX / window.innerWidth;
+    theta = (normalizedX * 2 - 1) * thetaRange;
 
-    // Camera position based on mouse move
-    camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
-    camera.position.y = zoom * Math.cos(phi);
-    camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
+    const mouseYNormalized = event.clientY / window.innerHeight;
+    const minPhi = Math.PI / 5;  // about 30 deg upwards
+    const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+    phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
   }
-  camera.lookAt(target);
 
-  document.addEventListener('resize', onResizeScreen, false);
-
+  document.addEventListener('mousemove', onMouseMove, false);
 }
 
 
@@ -226,11 +229,12 @@ let previousTime = 0
 
 
 const animate = () => {
-  updateCameraPosition()
+  handleCameraUpdates();
 
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
-  previousTime = elapsedTime
+  previousTime = elapsedTime;
+
   // GPGPU Update
   gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
   gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
@@ -241,9 +245,7 @@ const animate = () => {
   window.requestAnimationFrame(animate);
 
   // Render normal scene
-  renderer.render(scene, camera)
-
-
+  renderer.render(scene, camera);
 }
 
 animate();
