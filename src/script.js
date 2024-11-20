@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
@@ -39,7 +38,31 @@ const sizes = {
   pixelRatio: Math.min(window.devicePixelRatio, 2)
 }
 
-window.addEventListener('resize', () => {
+
+
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100);
+scene.add(camera);
+
+let theta = 0;
+let phi = Math.PI / 4;
+
+// Camera updates 
+function onMouseMove(event) {
+  const thetaRange = Math.PI / 6;
+  const normalizedX = event.clientX / window.innerWidth;
+  theta = (normalizedX * 2 - 1) * thetaRange;
+
+  const mouseYNormalized = event.clientY / window.innerHeight;
+  const minPhi = Math.PI / 5;  // about 30 deg upwards
+  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
+}
+
+function onResizeScreen() {
   // Update sizes
   sizes.width = window.innerWidth
   sizes.height = window.innerHeight
@@ -58,30 +81,29 @@ window.addEventListener('resize', () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height)
   renderer.setPixelRatio(sizes.pixelRatio)
-})
-
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100);
-
-if (sizes.width < 800) {
-  camera.position.set(4.5, 7, 9);
-} else {
-  camera.position.set(3, 4, 5);
 }
-console.log(camera);
-scene.add(camera)
 
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enabled = false;
-// controls.enableDamping = true
-// controls.enableZoom = false;
-// controls.enablePan = false;
-// controls.minPolarAngle = 0.7;
-// controls.maxPolarAngle = Math.PI * 0.35;
+function updateCameraPosition() {
+  const target = new THREE.Vector3();
+  const zoom = 8;
+
+  if (sizes.width < 800) {
+    camera.position.set(4.5, 7, 9);
+  } else {
+    // camera.position.set(3, 4, 5);
+    document.addEventListener('mousemove', onMouseMove, false);
+
+    // Camera position based on mouse move
+    camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
+    camera.position.y = zoom * Math.cos(phi);
+    camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
+  }
+  camera.lookAt(target);
+
+  document.addEventListener('resize', onResizeScreen, false);
+
+}
+
 
 /**
  * Renderer
@@ -203,34 +225,9 @@ const clock = new THREE.Clock()
 let previousTime = 0
 
 
-const target = new THREE.Vector3();
-const zoom = 8;
-
-let theta = 0;
-let phi = Math.PI / 4;
-
-document.addEventListener('mousemove', onMouseMove, false);
-
-function onMouseMove(event) {
-  const thetaRange = Math.PI / 6;
-  const normalizedX = event.clientX / window.innerWidth;
-  theta = (normalizedX * 2 - 1) * thetaRange;
-
-  const mouseYNormalized = event.clientY / window.innerHeight;
-  const minPhi = Math.PI / 5;  // about 30 deg upwards
-  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
-  phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
-}
-
 const animate = () => {
-  // Camera position based on mouse move
-  camera.position.x = zoom * Math.sin(phi) * Math.sin(theta);
-  camera.position.y = zoom * Math.cos(phi);
-  camera.position.z = zoom * Math.sin(phi) * Math.cos(theta);
-  camera.lookAt(target);
+  updateCameraPosition()
 
-  // Update controls
-  // controls.update()
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime
@@ -249,4 +246,4 @@ const animate = () => {
 
 }
 
-animate()
+animate();
