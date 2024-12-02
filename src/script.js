@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import GUI from 'lil-gui'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
@@ -8,6 +9,9 @@ import gpgpuParticlesShader from './shaders/gpgpu/particles.glsl'
 /**
  * Base
  */
+
+// gui
+const gui = new GUI({ width: 340 })
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
@@ -58,7 +62,6 @@ function handleCameraUpdates() {
   }
   camera.lookAt(target);
 }
-
 
 
 let theta = 0;
@@ -238,7 +241,33 @@ particles.material = new THREE.ShaderMaterial({
 particles.points = new THREE.Points(particles.geometry, particles.material)
 scene.add(particles.points);
 
+/**
+ * Tweaks
+ */
+// gui.addColor(debugObject, 'clearColor').onChange(() => { renderer.setClearColor(debugObject.clearColor) })
+gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('uSize')
 
+gui
+    .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence, 'value')
+    .min(0)
+    .max(10)
+    .name('uFlowFieldInfluence');
+
+gui
+    .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength, 'value')
+    .min(0)
+    .max(10)
+    .name('uFlowFieldStrength');
+
+gui
+    .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency, 'value')
+    .min(0)
+    .max(1)
+    .step(0.001)
+    .name('uFlowFieldFrequency');
+
+
+    
 /**
  * Animate
  */
