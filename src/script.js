@@ -14,7 +14,7 @@ import gpgpuParticlesShader from './shaders/gpgpu/particles.glsl'
 const gui = new GUI({ width: 340 })
 
 // Canvas
-const canvas = document.querySelector('canvas.webgl');
+const canvas = document.querySelector('canvas.webgl-gui');
 
 // Scene
 const scene = new THREE.Scene();
@@ -267,7 +267,7 @@ gui
     .name('uFlowFieldFrequency');
 
 
-    
+
 /**
  * Animate
  */
