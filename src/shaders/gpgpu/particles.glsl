@@ -22,17 +22,17 @@ void main() {
   // Alive
   else {
     // Strength
-    float strengthMultiplier = 1.5; 
+    float strengthMultiplier = 2.5; 
 
-    float strength = simplexNoise4d(vec4(base.xyz * strengthMultiplier, time + 1.0)); 
+    float strength = simplexNoise4d(vec4(base.xyz * strengthMultiplier, time + 3.0)); 
     float influence = (uFlowFieldInfluence - 0.5) * (- 2.0); 
     strength = smoothstep(influence, 1.0, strength);
     
     // Flow field 
     vec3 flowField = vec3(
-      simplexNoise4d(vec4(particle.xyz + 0.0, time * uFlowFieldFrequency)),
-      simplexNoise4d(vec4(particle.xyz + 1.0, time * uFlowFieldFrequency)),
-      simplexNoise4d(vec4(particle.xyz + 2.0, time * uFlowFieldFrequency))
+      simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 0.0, time * uFlowFieldFrequency)),
+      simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 1.0, time * uFlowFieldFrequency)),
+      simplexNoise4d(vec4(particle.xyz * uFlowFieldFrequency + 2.0, time * uFlowFieldFrequency))
     );
 
     flowField = normalize(flowField);
@@ -40,7 +40,7 @@ void main() {
     particle.xyz += flowField *  uDeltaTime  * strength * uFlowFieldStrength;
 
     // Decay
-    particle.a += uDeltaTime * 0.10;
+    particle.a += uDeltaTime * 0.15;
   }
 
   gl_FragColor = particle; 

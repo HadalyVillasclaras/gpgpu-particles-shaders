@@ -22,7 +22,7 @@ void main()
 	gl_Position = projectedPosition;
 
 	// Point size
-	float sizeIn = smoothstep(0.0, 0.4, particle.a); // particle gsl
+	float sizeIn = smoothstep(0.1, 0.2, particle.a); // particle gsl
 	float sizeOut = 1.0 - smoothstep(0.1, 1.0, particle.a); 
 	float size = min(sizeIn, sizeOut);
 

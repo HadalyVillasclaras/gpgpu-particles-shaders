@@ -67,11 +67,12 @@ let phi = Math.PI / 4;
 function onMouseMove(event) {
   const thetaRange = Math.PI / 6;
   const normalizedX = event.clientX / window.innerWidth;
-  theta = (normalizedX * 2 - 1) * thetaRange;
+  theta = (1 - normalizedX * 2 ) * thetaRange;
 
   const mouseYNormalized = event.clientY / window.innerHeight;
-  const minPhi = Math.PI / 5;  // about 30 deg upwards
-  const maxPhi = 2 * Math.PI / 6;  // about 120 deg downwards
+  const minPhi = 0;  // full zenithal
+  const maxPhi =  Math.PI / 3;  //  60 deg downwards
+
   phi = (1 - mouseYNormalized) * (maxPhi - minPhi) + minPhi;
 }
 
@@ -176,8 +177,8 @@ gpgpu.computation.setVariableDependencies(gpgpu.particlesVariable, [gpgpu.partic
 gpgpu.particlesVariable.material.uniforms.uTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0);
 gpgpu.particlesVariable.material.uniforms.uBase = new THREE.Uniform(baseParticlesTexture);
-gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(0.35);
-gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(1.4);
+gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(0.3);
+gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(1.8);
 gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(1.0);
 
 //Init
@@ -221,10 +222,9 @@ particles.material = new THREE.ShaderMaterial({
   fragmentShader: particlesFragmentShader,
   uniforms:
   {
-    uSize: new THREE.Uniform(0.035),
+    uSize: new THREE.Uniform(0.04),
     uResolution: new THREE.Uniform(new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)),
     uParticlesTexture: new THREE.Uniform(),
-    uCursor: new THREE.Uniform(new THREE.Vector2(0, 0)),
     uColor1: { value: new THREE.Color("#ed5a34") },
     uColor2: { value: new THREE.Color("#f93a7e") },
     uColor3: { value: new THREE.Color("#f76583") },
@@ -263,8 +263,8 @@ const animate = (time) => {
   handleCameraUpdates();
 
   // GPGPU Update
-  gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime;
-  gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime;
+  gpgpu.particlesVariable.material.uniforms.uTime.value = elapsedTime * 0.5;
+  gpgpu.particlesVariable.material.uniforms.uDeltaTime.value = deltaTime * 0.5;
   gpgpu.computation.compute();
   particles.material.uniforms.uParticlesTexture.value = gpgpu.computation.getCurrentRenderTarget(gpgpu.particlesVariable).texture;
 
