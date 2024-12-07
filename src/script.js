@@ -225,7 +225,7 @@ particles.material = new THREE.ShaderMaterial({
   fragmentShader: particlesFragmentShader,
   uniforms:
   {
-    uSize: new THREE.Uniform(0.04),
+    uSize: new THREE.Uniform(0.02),
     uResolution: new THREE.Uniform(new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio)),
     uParticlesTexture: new THREE.Uniform(),
     uColor1: { value: new THREE.Color("#ed5a34") },
@@ -245,26 +245,26 @@ scene.add(particles.points);
  * Tweaks
  */
 // gui.addColor(debugObject, 'clearColor').onChange(() => { renderer.setClearColor(debugObject.clearColor) })
-gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('uSize')
+gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('Impact')
 
 gui
     .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldInfluence, 'value')
     .min(0)
     .max(10)
-    .name('uFlowFieldInfluence');
+    .name('Connection');
 
 gui
     .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldStrength, 'value')
     .min(0)
     .max(10)
-    .name('uFlowFieldStrength');
+    .name('Reach');
 
 gui
     .add(gpgpu.particlesVariable.material.uniforms.uFlowFieldFrequency, 'value')
     .min(0)
     .max(1)
     .step(0.001)
-    .name('uFlowFieldFrequency');
+    .name('Vision');
 
 
 
