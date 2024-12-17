@@ -166,7 +166,7 @@ for (let i = 0; i < baseGeometry.count; i++) {
   const position = baseGeometry.instance.attributes.position.array;
   const color = baseParticlesTexture.image.data;
 
-  // Position based on geometry - cogemos el valor de la coordeanda x y se lo ponemos al canal R (de rgb)
+  // Position based on geometry - 
   color[i4 + 0] = position[i3 + 0]; // R
   color[i4 + 1] = position[i3 + 1]; // G
   color[i4 + 2] = position[i3 + 2]; // B
@@ -244,7 +244,6 @@ scene.add(particles.points);
 /**
  * Tweaks
  */
-// gui.addColor(debugObject, 'clearColor').onChange(() => { renderer.setClearColor(debugObject.clearColor) })
 gui.add(particles.material.uniforms.uSize, 'value').min(0).max(1).step(0.001).name('Impact')
 
 gui
@@ -274,7 +273,8 @@ gui
 const clock = new THREE.Clock();
 let previousTime = 0;
 
-const fps = 30; //  control the throttle
+// throttle
+const fps = 30;  
 const interval = 1000 / fps;
 let lastTime = 0;
 let animationFrameId = null;
